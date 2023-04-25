@@ -105,17 +105,17 @@ NodeTopics::add_subscription(
     callback_group = node_base_->get_default_callback_group();
   }
 
-  callback_group->add_subscription(subscription);
-
-  for (auto & key_event_pair : subscription->get_event_handlers()) {
-    auto subscription_event = key_event_pair.second;
-    callback_group->add_waitable(subscription_event);
-  }
-
   auto intra_process_waitable = subscription->get_intra_process_waitable();
   if (nullptr != intra_process_waitable) {
     // Add to the callback group to be notified about intra-process msgs.
     callback_group->add_waitable(intra_process_waitable);
+  } else {
+    callback_group->add_subscription(subscription);
+
+    for (auto & key_event_pair : subscription->get_event_handlers()) {
+      auto subscription_event = key_event_pair.second;
+      callback_group->add_waitable(subscription_event);
+    }
   }
 
   // Notify the executor that a new subscription was created using the parent Node.
